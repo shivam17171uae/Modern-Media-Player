@@ -1,7 +1,7 @@
 # All Player 🎵🎬🖼️
 
-![App Screenshot](https://i.imgur.com/your-screenshot-url.png)
-_**Note:** You should take a screenshot of your running application, upload it to a site like [Imgur](https://imgur.com/upload), and replace the link above with your image URL._
+<img width="1053" height="661" alt="Screenshot 2025-08-29 080406" src="https://github.com/user-attachments/assets/e6d08b72-cb7f-465b-85b7-25ec47ccdb4f" />
+
 
 A modern, sleek media player for music, video, and pictures, built with Python. This application features a dark-themed, intuitive UI powered by CustomTkinter and a robust playback engine using `python-vlc`.
 
