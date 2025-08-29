@@ -66,6 +66,7 @@ Once the setup is complete, you can run the application with the following comma
 
 ```bash
 python main.py
+```
 
 Click "Add Files" in any tab to start building your media library!
 
