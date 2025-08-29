@@ -107,8 +107,6 @@ class VLCPlayer:
     def get_album_art_pil(self, tag):
         """ Extracts album art and returns it as a Pillow Image object. """
         try:
-            # tag.images.any returns a special Image object from TinyTag
-            # We need to get the raw binary data from its '.data' attribute.
             if image_object := tag.images.any:
                 image_data = image_object.data
                 return Image.open(io.BytesIO(image_data))
@@ -393,6 +391,11 @@ class ModernMediaPlayer(customtkinter.CTk):
         self.is_muted = False
         self.welcome_frame = None
         self.is_shuffle, self.repeat_mode = False, 0
+        
+        # --- FIX: ATTACH EVENT HANDLER ONLY ONCE ---
+        # This tells the player to call self.handle_media_end whenever a track finishes.
+        # By doing this here, we ensure it's only set up one time.
+        self.player.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.handle_media_end)
 
         self.setup_main_layout()
         self.create_sidebar()
@@ -546,7 +549,7 @@ class ModernMediaPlayer(customtkinter.CTk):
         self.current_media_filepath = filepath
         self.current_media_tab = tab_instance
         
-        self.player.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.handle_media_end)
+        # --- FIX: REMOVED THE REPEATED EVENT ATTACHMENT FROM HERE ---
 
         if tab_instance.media_type == "Pictures":
             self.display_picture(filepath)
@@ -714,16 +717,17 @@ class ModernMediaPlayer(customtkinter.CTk):
     def handle_media_end(self, event):
         """ Called by the VLC event manager when a track finishes. """
         if self.repeat_mode == 2: # Repeat One
-            # Use after to avoid potential deadlocks by re-calling play immediately
             self.after(100, lambda: self.play_media(self.current_media_filepath, self.current_media_tab))
         elif self.repeat_mode == 1: # Repeat All
             self.after(100, self.play_next)
         else: # No repeat
             try:
                 data = self.current_media_tab.library_data
-                if data.index(self.current_media_filepath) < len(data) - 1:
+                current_index = data.index(self.current_media_filepath)
+                if current_index < len(data) - 1:
                     self.after(100, self.play_next)
                 else: 
+                    # Last song finished, reset UI
                     self.play_pause_btn.configure(text="▶")
                     self.progress_bar.set(0)
                     self.time_label.configure(text="00:00")
